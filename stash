@@ -1,0 +1,6 @@
+if [ $rcat_ignore_dot -eq 1 ]; then
+	find_options="${find_options} -not -path '*/.*'"
+fi
+if [ $rcat_ignore_git -eq 1 ]; then
+	find_options="${find_options} -not -path '.git/*'"
+fi
