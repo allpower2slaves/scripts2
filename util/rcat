@@ -113,7 +113,7 @@ return 0
 }
 
 check_files(){
-POSIXLY_CORRECT=1 file "$1" | cut -d $'\0' -f3 | grep -q 'text' && echo $1
+POSIXLY_CORRECT=1 file "$1" | cut -d' ' -f3 | grep -q 'text' && echo $1
 }
 
 print_file(){
