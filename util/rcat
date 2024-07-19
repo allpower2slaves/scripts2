@@ -63,7 +63,7 @@ while :; do
 			shift
 			shift
 			;;
-		-C | --command) # execute command on files (default:cat)
+		-c | --command) # execute command on files (default:cat)
 			rcat_cat_executable="$2"
 			shift
 			shift
@@ -125,9 +125,13 @@ fi
 
 print_file(){
 if [ $rcat_quiet -eq 0 ]; then
-	printf "\n$1\n"
+	if [ -t 1 ]; then # if stdout is terminal
+		printf "%b" "\033[33;1m"$1"\033[0m\n" # colored variant
+	else
+		printf ""$1"\n"
+	fi
 fi
-"$rcat_cat_executable" "$1"; printf '\n'
+eval ""$rcat_cat_executable" "$1"; printf '\n'"
 }
 
 # debug
