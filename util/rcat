@@ -11,8 +11,8 @@ rcat_index="" # variable for dir\file setting
 # varbiables for options
 rcat_insert_newline="0"
 rcat_insert_filename="0"
-rcat_use_custom_separator="0"
 # variable for separator
+rcat_quiet="0"
 rcat_sep="\n" # maybe use it with printf idk
 
 # advanced
@@ -108,20 +108,32 @@ if [ $rcat_realpath -eq 1 ]; then
 fi
 
 # return the thing
-eval "find $1 $find_options $find_after_pipe 2>/dev/null" 2>/dev/null
+eval "find "$1" $find_options $find_after_pipe 2>/dev/null" 2>/dev/null
 return 0
 }
 
 check_files(){
-POSIXLY_CORRECT=1 file "$1" | cut -d' ' -f3 | grep -q 'text' && echo $1
+# function is basically "is this file a textfile
+# do i need return here? idk
+
+if [ $rcat_ignore_binary -ne 0 ]; then
+POSIXLY_CORRECT=1 file "$1" | grep -q ':.*text' && return 0
+else
+	return 0
+fi
 }
 
 print_file(){
-$rcat_cat_executable "$1"
+if [ $rcat_quiet -eq 0 ]; then
+	printf "\n$1\n"
+fi
+"$rcat_cat_executable" "$1"; printf '\n'
 }
 
 # debug
 #echo $find_after_pipe
-echo $rcat_cat_executable
+#echo $rcat_cat_executable
 
-get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename"; done
+#get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && echo "$filename" ; done
+
+get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && print_file "$filename"; done
