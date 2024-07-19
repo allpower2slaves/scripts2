@@ -64,7 +64,7 @@ while :; do
 			shift
 			;;
 		-C | --command) # execute command on files (default:cat)
-			rcat_cat_executable=$2
+			rcat_cat_executable="$2"
 			shift
 			shift
 			;;
@@ -79,7 +79,7 @@ while :; do
 			;;
 		*) # when there are no more options
 			if [ -n "$1" ]; then
-				rcat_index=$1
+				rcat_index="$1"
 			else
 				rcat_index="."
 			fi
@@ -113,12 +113,11 @@ return 0
 }
 
 check_files(){
-POSIXLY_CORRECT=1 file $1 | cut -d $'\0' -f3 | grep -q 'text' && echo $1
+POSIXLY_CORRECT=1 file "$1" | cut -d $'\0' -f3 | grep -q 'text' && echo $1
 }
 
-print_files(){
-#function to execute the stuff on files
-echo "placeholder"
+print_file(){
+$rcat_cat_executable "$1"
 }
 
 # debug
