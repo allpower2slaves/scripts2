@@ -22,6 +22,8 @@ rcat_ignore_dot="1" # ignore all files starting with .
 rcat_ignore_binary="1" # do not cat binary files
 rcat_realpath="0" # if 1, print out realpath
 
+rcat_cat_executable="cat"
+
 find_options="" # options for find thing
 find_after_pipe=""
 
@@ -55,12 +57,15 @@ while :; do
 			shift
 			;;
 		# todo: make grep-like thing maybe(?)
+		# todo: make the thing use * maybe
 		-e | --exclude) # exclude pattern
 			find_after_pipe="${find_after_pipe} | grep -v '$2'"
 			shift
 			shift
 			;;
 		-C | --command) # execute command on files (default:cat)
+			rcat_cat_executable=$2
+			shift
 			shift
 			;;
 		--) # end of all options
@@ -84,15 +89,12 @@ done
 
 get_files(){ 
 # function to parse all uhh
-# reference command:
-#find /tmp/ -not -path '*.git/*' -not -name './.*'
-# parse options
-find_options=""
 
 # NOTE: i changed it to `find | grep` because `-not` is absent in POSIX and busybox
 
 # todo: (maybe) move it to option parser because itll be more compact
-# TODO: please uhh double-check this thing
+# TODO: please uhh reevaluate grep syntax
+
 if [ $rcat_ignore_dot -eq 1 ]; then
 	find_after_pipe="${find_after_pipe} | grep -v -F '/.'"
 fi
@@ -106,15 +108,21 @@ if [ $rcat_realpath -eq 1 ]; then
 fi
 
 # return the thing
-eval "find $1 $find_options $find_after_pipe 2>/dev/null"
+eval "find $1 $find_options $find_after_pipe 2>/dev/null" 2>/dev/null
 return 0
 }
 
+check_files(){
+POSIXLY_CORRECT=1 file $1 | cut -d $'\0' -f3 | grep -q 'text' && echo $1
+}
 
+print_files(){
+#function to execute the stuff on files
+echo "placeholder"
+}
 
 # debug
 #echo $find_after_pipe
-get_files $rcat_index
+echo $rcat_cat_executable
 
-# TODO
-# -E | --exclude -- exclude pattern
+get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename"; done
