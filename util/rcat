@@ -1,0 +1,112 @@
+#!/bin/sh
+# a simple utility to recursive cat files in a dir
+# by default, it should print out headers (i think)
+# must be posix-compatible(!!!) NOTE: this thing can also use realpath, which is a part of GNU coreutils and BSD utils so i guess im clear
+
+# positional variables (or whatever you can call em)
+# DO NOT INDEX by '.' symbol -- find will show it no matter what options i use
+
+rcat_index="" # variable for dir\file setting
+
+# varbiables for options
+rcat_insert_newline="0"
+rcat_insert_filename="0"
+rcat_use_custom_separator="0"
+# variable for separator
+rcat_sep="\n" # maybe use it with printf idk
+
+# advanced
+rcat_cat_variables=""
+rcat_ignore_git="1" # ignore .git directory :)
+rcat_ignore_dot="1" # ignore all files starting with .
+rcat_ignore_binary="1" # do not cat binary files
+rcat_realpath="0" # if 1, print out realpath
+
+find_options="" # options for find thing
+
+while :; do
+	case $1 in
+		-h | --help)
+			greeter_help
+			exit 0;;
+		-v | --verbose) 
+			set -o xtrace # TODO: posixfy
+			shift
+			;;
+		-q | --quiet) # disable separator newline and newfile
+			shift
+			;;
+		-a) # show files starting with dot, excluding git
+			rcat_ignore_dot="0"
+			shift
+			;;
+		-A | --all) # show everything, including .git
+			rcat_ignore_dot="0"
+			rcat_ignore_git="0"
+			shift
+			;;
+		-b | --binary) # also cat binary files
+			rcat_ignore_binary="0"
+			shift
+			;;
+		-R | --realpath) # index realpath filenames
+			rcat_realpath="1"
+			shift
+			;;
+		-E | --exclude ) # exclude pattern
+			find_options="${find_options} -not -path '$2'"
+			shift
+			;;
+		--) # end of all options
+			shift
+			break
+			;;
+		-*) # invalid option
+			printf >&2 "ERROR: Invalid flag '%s'\n\n" "$1"
+			greeter_help
+			exit 1
+			;;
+		*) # when there are no more options
+			if [ -n "$1" ]; then
+				rcat_index=$1
+			else
+				rcat_index=$PWD
+			fi
+			break
+	esac
+done
+
+get_files(){ 
+# function to parse all uhh
+# reference command:
+#find /tmp/ -not -path '*.git/*' -not -name './.*'
+# parse options
+find_options=""
+find_after_pipe=""
+
+# TODO: (maybe) move it to option parser because itll be more compact
+# set find_options
+if [ $rcat_ignore_dot -eq 1 ]; then
+	find_options="${find_options} -not -path '*/.*'"
+fi
+if [ $rcat_ignore_git -eq 1 ]; then
+	find_options="${find_options} -not -path '.git/*'"
+fi
+
+# TODO: maybe rewirte it using -exec
+# TODO: maybe add `-t` trace mode option to xtrace
+if [ $rcat_realpath -eq 1 ]; then
+	find_after_pipe="${find_after_pipe} | xargs realpath"
+	echo $find_after_pipe
+fi
+
+# return the thing
+eval "find $1 $find_options $find_after_pipe 2>/dev/null"
+return 0
+}
+
+# debug
+get_files $rcat_index
+
+# TODO
+# -E | --exclude -- exclude pattern
