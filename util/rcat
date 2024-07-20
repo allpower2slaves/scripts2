@@ -11,13 +11,18 @@
 # option to disable filename output completely
 # option to just list the indexed files (btw i think -c '' construction is ok
 # just make the parser because if its empty as is it will try to launch every
-# indexed file which is bad and insecure and whatever)
+# indexed file which is bad and insecure and whatever) (i mean instead of
+# reinventing the wheel just use working -c '' construction and just make the
+# check IF the $rcat_cat_executable is empty, dont actually exec anything)
+# (also this check will actually INCREASE security so uhh we can call it a security feature :))
 # option to filter the file output via something
 
 # todo secondary
 # option to disable color (probably create a new color variable and make stdout
 # check much earlier then) (i think theres no need for moving stdout after
-# having a second thought)
+# having a second thought) (actually i should assign the variable FIRST via
+# parsing options or checking stdout, and only check the variable and print
+# colors based on that variable)
 # option to set the custom delimiter (its a very hackable solution because the
 # end user could use $rcat_* variables with them)
 
