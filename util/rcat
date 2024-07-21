@@ -7,7 +7,7 @@
 # DO NOT INDEX by '.' symbol -- find will show it no matter what options i use
 
 # TODO:
-# option to disable command output (aka no 'cat' in front of the filename)
+# disable command output (aka no 'cat' in front of the filename)
 # option to disable filename output completely
 # option to just list the indexed files (btw i think -c '' construction is ok
 # just make the parser because if its empty as is it will try to launch every
@@ -25,6 +25,8 @@
 # colors based on that variable)
 # option to set the custom delimiter (its a very hackable solution because the
 # end user could use $rcat_* variables with them)
+# option to reenable commadn output (aka `cat` in front of the filename)
+# (actually thing thing is A overkill, B can be implemented with setting custom delimiter)
 
 # notes
 # thanks to the modular design of this program (all functions are indepent of
@@ -158,7 +160,12 @@ if [ $rcat_quiet -eq 0 ]; then
 		printf "%b" "$rcat_cat_executable "$1"\n"
 	fi
 fi
-eval ""$rcat_cat_executable" "$1""
+
+# why return 0? because otherwise test part returns 1 and theres no real problem
+# in this line returning 1 because it was designed to handle fails (aka when
+# the $rcat_cat_executable is empty just dont eval and thats it. we move
+# forward we live we love we laugh
+test -n "$rcat_cat_executable" && eval ""$rcat_cat_executable" "$1"" || return 0
 }
 
 # debug
@@ -167,4 +174,4 @@ eval ""$rcat_cat_executable" "$1""
 
 #get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && echo "$filename" ; done
 
-get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && print_file "$filename"; done
+get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && print_file "$filename"; done && exit 0
