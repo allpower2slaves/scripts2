@@ -145,7 +145,7 @@ check_files(){
 # do i need return here? idk
 
 if [ $rcat_ignore_binary -ne 0 ]; then
-POSIXLY_CORRECT=1 file "$1" | grep -q ':.*text' && return 0
+POSIXLY_CORRECT=1 file "$1" | grep -q -e ':.*text' -e ':.*empty'
 else
 	return 0
 fi
