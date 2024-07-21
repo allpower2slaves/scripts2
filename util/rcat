@@ -7,7 +7,7 @@
 # DO NOT INDEX by '.' symbol -- find will show it no matter what options i use
 
 # TODO:
-# disable command output (aka no 'cat' in front of the filename)
+# disable command output (aka no 'cat' in front of the filename) (debatable)
 # option to disable filename output completely
 # option to just list the indexed files (btw i think -c '' construction is ok
 # just make the parser because if its empty as is it will try to launch every
@@ -65,6 +65,7 @@ while :; do
 			shift
 			;;
 		-q | --quiet) # disable separator newline and newfile
+			rcat_quiet="1"
 			shift
 			;;
 		-a) # show files starting with dot, excluding git
