@@ -136,7 +136,7 @@ if [ $rcat_realpath -eq 1 ]; then
 	find_after_pipe="${find_after_pipe} | xargs realpath"
 fi
 
-# return the thing
+# return the thing #TODO: reeval the 2>/dev/null thing please
 eval "find "$1" $find_options $find_after_pipe 2>/dev/null" 2>/dev/null
 return 0
 }
@@ -166,7 +166,7 @@ fi
 # in this line returning 1 because it was designed to handle fails (aka when
 # the $rcat_cat_executable is empty just dont eval and thats it. we move
 # forward we live we love we laugh
-test -n "$rcat_cat_executable" && eval ""$rcat_cat_executable" "$1"" || return 0
+test -n "$rcat_cat_executable" && eval '$rcat_cat_executable "$1"' || return 0
 }
 
 # debug
