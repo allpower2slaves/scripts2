@@ -59,10 +59,11 @@ rcat_cat_executable="cat"
 find_options="" # options for find thing
 find_after_pipe=""
 
+parse_options(){
 while :; do
 	case $1 in
 		-h | --help)
-			greeter_help
+			print_help
 			exit 0;;
 		-v | --verbose) 
 			set -o xtrace # TODO: posixfy
@@ -107,7 +108,7 @@ while :; do
 			;;
 		-*) # invalid option
 			printf >&2 "ERROR: Invalid flag '%s'\n\n" "$1"
-			greeter_help
+			print_help
 			exit 1
 			;;
 		*) # when there are no more options
@@ -119,6 +120,20 @@ while :; do
 			break
 	esac
 done
+}
+
+print_help(){
+printf'%s\n' \
+'-h, --help -- show help' \
+'-v, --verbose -- enable verbose debug' \
+'-a -- do not ignore entries starting with . (excluding `./git/`)' \
+'-A, --all -- do not ignore entries starting with .' \
+'-q, --quiet -- do not print out filename' \
+'-b, --binary -- do not ignore non-text files' \
+'-e <PATTERN>, --exclude <PATTERN> -- exclude `<PATTERN>`' \
+'-c <COMMAND>, -command <PATTERN> -- command to execute on every indexed file' \
+'-R, --realpath -- non-POSIX option: print out absolute filenames'
+}
 
 get_files(){ 
 # function to parse all uhh
@@ -179,4 +194,5 @@ test -n "$rcat_cat_executable" && eval '$rcat_cat_executable "$1"' || return 0
 
 #get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && echo "$filename" ; done
 
+parse_options "$@"
 get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && print_file "$filename"; done && exit 0
