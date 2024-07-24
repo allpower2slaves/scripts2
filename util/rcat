@@ -1,5 +1,9 @@
 #!/bin/sh
 # a simple utility to recursive cat files in a dir
+
+# original author
+# https://github.com/allpower2slaves
+
 # by default, it should print out headers (i think)
 # must be posix-compatible(!!!) NOTE: this thing can also use realpath, which is a part of GNU coreutils and BSD utils so i guess im clear
 
