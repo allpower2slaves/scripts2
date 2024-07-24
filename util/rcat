@@ -123,16 +123,21 @@ done
 }
 
 print_help(){
-printf'%s\n' \
-'-h, --help -- show help' \
-'-v, --verbose -- enable verbose debug' \
-'-a -- do not ignore entries starting with . (excluding `./git/`)' \
-'-A, --all -- do not ignore entries starting with .' \
-'-q, --quiet -- do not print out filename' \
-'-b, --binary -- do not ignore non-text files' \
-'-e <PATTERN>, --exclude <PATTERN> -- exclude `<PATTERN>`' \
-'-c <COMMAND>, -command <PATTERN> -- command to execute on every indexed file' \
-'-R, --realpath -- non-POSIX option: print out absolute filenames'
+# i think i could use one string here...
+printf '%s\n' \
+'rcat' \
+'made by https://github.com/allpower2slaves' \
+'' \
+'Options:' \
+'	-h, --help -- show help' \
+'	-v, --verbose -- enable verbose debug' \
+'	-a -- do not ignore entries starting with . (excluding `./git/`)' \
+'	-A, --all -- do not ignore entries starting with .' \
+'	-q, --quiet -- do not print out filename' \
+'	-b, --binary -- do not ignore non-text files' \
+'	-e <PATTERN>, --exclude <PATTERN> -- exclude `<PATTERN>`' \
+'	-c <COMMAND>, -command <PATTERN> -- command to execute on every indexed file' \
+'	-R, --realpath -- non-POSIX option: print out absolute filenames'
 }
 
 get_files(){ 
