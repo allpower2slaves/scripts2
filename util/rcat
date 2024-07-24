@@ -37,6 +37,12 @@
 # each other and only use shared global main level variables), its easy to add
 # new features. also it seems that the indexer function doesnt even need any
 # tweaking
+# interesting thing -- this script actually can print out the same file twice
+# if it meets a symlink to a text file. disabling POSIXLY_CORRECT in find
+# part is not an option, because it will break POSIX compatibility. is
+# dublicate output even a problem? POSIX find has -h option to actually print
+# out if a symbolic link is a symbolic link. ill keep it as it for now
+
 
 rcat_index="" # variable for dir\file setting
 

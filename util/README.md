@@ -1,5 +1,6 @@
 # util
-## Description
+## rcat
+### Description
 POSIX sh compatible tool for recursively opening all text files in a directory.
 
 By default, `rcat` uses `cat` to open files, but that can be changed with `-c` option.
@@ -32,7 +33,7 @@ installed)
 rcat -c `` -R
 ```
 
-## Options
+### Options
 + `-h, --help` -- show help
 + `-v, --verbose` -- enable verbose debug
 + `-a` -- do not ignore entries starting with . (excluding `./git/`)
