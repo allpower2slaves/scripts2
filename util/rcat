@@ -61,6 +61,8 @@ rcat_ignore_binary="1" # do not cat binary files
 rcat_realpath="0" # if 1, print out realpath
 
 rcat_cat_executable="cat"
+rcat_cat_printname="" # printing name for a command, is changed later by
+		      #default
 
 find_options="" # options for find thing
 find_after_pipe=""
@@ -183,12 +185,18 @@ fi
 }
 
 print_file(){
+if [ -n "$rcat_cat_executable" ]; then
+	rcat_cat_printname=""$rcat_cat_executable" "
+else
+	rcat_cat_printname="" # this else isnt even needed
+fi
+
 if [ $rcat_quiet -eq 0 ]; then
 	if [ -t 1 ]; then # if stdout is terminal
-		printf "%b" "\033[33;1m$rcat_cat_executable "$1"\033[0m\n"
+		printf "%b" "\033[33;1m$rcat_cat_printname"$1"\033[0m\n"
 		# colored variant
 	else
-		printf "%b" "$rcat_cat_executable "$1"\n"
+		printf "%b" "$rcat_cat_printname"$1"\n"
 	fi
 fi
 
