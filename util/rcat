@@ -20,6 +20,7 @@
 # check IF the $rcat_cat_executable is empty, dont actually exec anything)
 # (also this check will actually INCREASE security so uhh we can call it a security feature :))
 # option to filter the file output via something
+# option maybe some kind of switch to handle empty files
 
 # todo secondary
 # option to disable color (probably create a new color variable and make stdout
@@ -196,10 +197,9 @@ fi
 
 if [ $rcat_quiet -eq 0 ]; then
 	if [ -t 1 ]; then # if stdout is terminal
-		printf "%b" "\033[33;1m$rcat_cat_printname"$1"\033[0m\n"
-		# colored variant
+		printf "%b%s%b" "\033[33;1m" "$rcat_cat_printname""$1" "\033[0m\n"
 	else
-		printf "%b" "$rcat_cat_printname"$1"\n"
+		printf "%s%b" "$rcat_cat_printname""$1" "\n"
 	fi
 fi
 
