@@ -128,6 +128,9 @@ while :; do
 			break
 	esac
 done
+
+# sanitize -c
+rcat_cat_executable=$(printf "$rcat_cat_executable" | sed 's/^[ \t]*//' | sed 's/ *$//')
 }
 
 print_help(){
