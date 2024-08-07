@@ -161,15 +161,13 @@ get_files(){
 # function to parse all uhh
 
 # NOTE: i changed it to `find | grep` because `-not` is absent in POSIX and busybox
-
-# todo: (maybe) move it to option parser because itll be more compact
-# TODO: please uhh reevaluate grep syntax
+# actually its a lie they have ! so i changed it to proper syntax
 
 if [ $rcat_ignore_dot -eq 1 ]; then
-	find_after_pipe="${find_after_pipe} | grep -v -F '/.'"
+	find_options="${find_options} ! -name '.*'"
 fi
 if [ $rcat_ignore_git -eq 1 ]; then
-	find_after_pipe="${find_after_pipe} | grep -v -F '.git/'"
+	find_options="${find_options} ! -path '.git'"
 fi
 
 # todo: maybe add `-t` trace mode option to xtrace with -v
@@ -177,8 +175,10 @@ if [ $rcat_realpath -eq 1 ]; then
 	find_after_pipe="${find_after_pipe} | xargs realpath"
 fi
 
-# return the thing #TODO: reeval the 2>/dev/null thing please
-eval "find "$1" $find_options $find_after_pipe 2>/dev/null" 2>/dev/null
+# return the thing #todo: reeval the 2>/dev/null thing please
+#eval "find "$1" $find_options $find_after_pipe 2>/dev/null" 2>/dev/null
+
+eval "find "$1" $find_options $find_after_pipe"
 return 0
 }
 
