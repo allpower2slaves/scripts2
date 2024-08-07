@@ -19,6 +19,7 @@
 # reinventing the wheel just use working -c '' construction and just make the
 # check IF the $rcat_cat_executable is empty, dont actually exec anything)
 # (also this check will actually INCREASE security so uhh we can call it a security feature :))
+# actually it was wrong and i disabled it but whatever
 # option to filter the file output via something
 # option maybe some kind of switch to handle empty files
 
@@ -53,7 +54,7 @@ rcat_insert_newline="0"
 rcat_insert_filename="0"
 # variable for separator
 rcat_quiet="0"
-rcat_sep="\n" # maybe use it with printf idk
+rcat_sep="\n" # maybe use it with printf idk; currently unused
 
 # advanced
 rcat_cat_variables=""
@@ -63,6 +64,8 @@ rcat_ignore_binary="1" # do not cat binary files
 rcat_realpath="0" # if 1, print out realpath
 
 rcat_cat_executable="cat"
+
+rcat_skip_executable="0" # if yes, dont execute anything (dont open the file)
 
 # stuff that will source itself (DO NOT TOUCH)
 rcat_cat_printname="" 
@@ -116,6 +119,10 @@ while :; do
 			shift
 			shift
 			;;
+		-l | --list) # dont open the file, old -c '' behavior
+			rcat_skip_executable="1"
+			shift
+			;;
 		--) # end of all options
 			shift
 			break
@@ -152,6 +159,7 @@ printf '%s\n' \
 '	-A, --all -- do not ignore entries starting with .' \
 '	-q, --quiet -- do not print out filename' \
 '	-b, --binary -- do not ignore non-text files' \
+'	-l, --list -- print out indexed filenames' \
 '	-e <PATTERN>, --exclude <PATTERN> -- exclude `<PATTERN>`' \
 '	-c <COMMAND>, -command <PATTERN> -- command to execute on every indexed file' \
 '	-R, --realpath -- non-POSIX option: print out absolute filenames'
@@ -196,10 +204,10 @@ fi
 print_file(){
 # add a space after a command, basically
 # maybe this thing should be in `parse_options` function
-if [ -n "$rcat_cat_executable" ]; then
-	rcat_cat_printname=""$rcat_cat_executable" "
+if [ $rcat_skip_executable -eq 1 ]; then
+	rcat_cat_printname=''
 else
-	rcat_cat_printname="" # this else isnt even needed
+	rcat_cat_printname=$rcat_cat_executable
 fi
 
 # set rcat_print_file_filename
@@ -219,7 +227,7 @@ fi
 # in this line returning 1 because it was designed to handle fails (aka when
 # the $rcat_cat_executable is empty just dont eval and thats it. we move
 # forward we live we love we laugh
-test -n "$rcat_cat_executable" && eval '$rcat_cat_executable "$1"' || return 0
+test $rcat_skip_executable -eq 0 && eval '$rcat_cat_executable "$1"' || return 0
 }
 
 # debug
@@ -229,4 +237,4 @@ test -n "$rcat_cat_executable" && eval '$rcat_cat_executable "$1"' || return 0
 #get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && echo "$filename" ; done
 
 parse_options "$@"
-get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && print_file "$filename"; done && exit 0
+get_files "$rcat_index" | while IFS= read -r filename; do check_files "$filename" && print_file "$filename"; done
