@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+# small utility to convert directories to btrfs subvolumes
+# made with ansible in mind
+# it also uses GNU coreutils, i dont know how would it work on other systems
+
+shopt -s dotglob
+
+changed="0" # variable for tracking changes. for `-A` thing
+ansible_mode="0" # report parseable "changed" when something was changed
+
+s_dir="" # variable for the directory that needs to be converted
+tmp_dir="" # variable for temporary dir with random garbage in its name
+
+parse_options(){
+while :; do
+	case $1 in
+		-h | --help)
+			print_help
+			exit 0;;
+		-v | --verbose) 
+			set -o xtrace
+			shift
+			;;
+		-A | --ansible) # ansible mode -- echo changed
+			ansible_mode="1"
+			shift
+			;;
+########	-U | --unsafe) # skip directory checks
+########		shift
+########		;;
+########	-D | --dryrun)
+########		shift
+########		;;
+		--) # end of all options
+			shift
+			break
+			;;
+		-*) # invalid option
+			printf >&2 "ERROR: Invalid flag '%s'\n\n" "$1"
+			print_help
+			exit 1
+			;;
+		*) # when there are no more options
+			if [ -n "$1" ]; then
+				s_dir="$(realpath $1)"
+########		else
+########			s_dir="$(realpath .)"
+			fi
+			break
+	esac
+done
+}
+
+print_help(){
+	printf "hello world\n"
+}
+
+print_error(){
+	printf "not hello\n"
+}
+
+print_ansible(){
+	test $ansible_mode -ne 0 && printf "changed\n" || return 0
+}
+
+# function to test if a directory is btrfs and not on some weird link or not a btrfs subvol already
+test_directory(){
+
+	# test if the filesystem on btrfs
+	(stat -f --format=%T "$s_dir" | grep -iqe 'btrfs' ) || ( printf "not using btrfs, exiting\n" && exit 1 )
+
+	# test if the directory is already a subvol
+	(btrfs subvolume show "$s_dir" 2>&1 | grep -ivqe 'ERROR: Not a Btrfs subvolume: Invalid argument' ) && printf "the directory is a btrfs subvol\n" && exit 0
+
+	# test if its even a directory
+	test -d "$s_dir" || exit 1
+}
+
+
+# main functionality
+convert_thing(){
+
+	tmp_dir="$(realpath $s_dir )-$(tr -dc A-Z-a-z-0-9 </dev/urandom | head -c 6)"
+
+	#$s_dir = "$(realpath $s_dir)"
+
+	# if the source directory is PWD, do cd .. (i dont even think thats necessary)
+	#test "$(realpath "$PWD")" = "$s_dir" && cd ..
+	
+	(
+	mv "$s_dir" "$tmp_dir" && print_ansible && \
+	btrfs -q subvolume create "$s_dir" && \
+	mv "$tmp_dir"/* "$s_dir" 
+	) || exit 1
+}
+
+## main
+parse_options "$@" && test_directory && convert_thing
