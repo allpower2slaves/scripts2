@@ -4,6 +4,8 @@
 # made with ansible in mind
 # it also uses GNU coreutils, i dont know how would it work on other systems
 
+# currently WIP, some stuff will not work (like error output)
+
 shopt -s dotglob
 
 changed="0" # variable for tracking changes. for `-A` thing
@@ -12,7 +14,7 @@ ansible_mode="0" # report parseable "changed" when something was changed
 s_dir="" # variable for the directory that needs to be converted
 tmp_dir="" # variable for temporary dir with random garbage in its name
 
-parse_options(){
+main(){
 while :; do
 	case $1 in
 		-h | --help)
@@ -44,12 +46,14 @@ while :; do
 		*) # when there are no more options
 			if [ -n "$1" ]; then
 				s_dir="$(realpath $1)"
-########		else
-########			s_dir="$(realpath .)"
+        		else
+				print_help
 			fi
 			break
 	esac
 done
+
+test_directory || exit 1
 }
 
 print_help(){
@@ -68,14 +72,38 @@ print_ansible(){
 test_directory(){
 
 	# test if the filesystem on btrfs
-	(stat -f --format=%T "$s_dir" | grep -iqe 'btrfs' ) || ( printf "not using btrfs, exiting\n" && exit 1 )
+	if ! (stat -f --format=%T "$(dirname "$s_dir")" | grep -iqe 'btrfs' ); then
+		printf "not using btrfs, exiting\n" && return 1
+	fi
+
+	# test 3: snake eater
+	if [ -d "$s_dir" ]; then
+		if (btrfs subvolume show "$s_dir" 2>&1 | grep -iqve 'ERROR: Not a Btrfs subvolume: Invalid argument'); then
+			printf "$s_dir is already is a btrfs subvolume\n"
+		else
+			convert_thing
+		fi
+	elif [ ! -e "$s_dir" ]; then
+		create_thing
+	else
+		printf "ERROR: $s_dir might be a file or you lack necessary permissions\n" && return 1
+	fi
+	
+
+
+
 
 	# test if the directory is already a subvol
-	(btrfs subvolume show "$s_dir" 2>&1 | grep -ivqe 'ERROR: Not a Btrfs subvolume: Invalid argument' ) && printf "the directory is a btrfs subvol\n" && exit 0
+	#if (btrfs subvolume show "$s_dir" 2>&1 | grep -ivqe 'ERROR: Not a Btrfs subvolume: Invalid argument'); then
 
-	# test if its even a directory
-	test -d "$s_dir" || exit 1
+	# if its a directory
+
+#	test -d "$s_dir" && convert_thing && return 0
+
+	# if not a directory, if its not a file
+#	test ! -e "$s_dir" && create_thing || return 1
 }
+
 
 
 # main functionality
@@ -91,9 +119,13 @@ convert_thing(){
 	(
 	mv "$s_dir" "$tmp_dir" && print_ansible && \
 	btrfs -q subvolume create "$s_dir" && \
-	mv "$tmp_dir"/* "$s_dir" 
-	) || exit 1
+	mv "$tmp_dir"/* "$s_dir" && \
+	rmdir "$tmp_dir"
+	) || return 1
 }
 
-## main
-parse_options "$@" && test_directory && convert_thing
+create_thing(){	# if the directory wasnt even there in the first place
+	btrfs -q subvolume create "$s_dir" && print_ansible || return 1
+}
+
+main "$@"
