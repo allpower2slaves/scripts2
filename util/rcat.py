@@ -126,9 +126,6 @@ def print_header(file, method=''):
     else:
         print((method + ' ' + file).strip())
 
-
-
-
 def print_file(file, method=None):
     if method == None:
        try:
@@ -136,8 +133,9 @@ def print_file(file, method=None):
                 print(file.read()[:-1])
        except UnicodeDecodeError:
            pass
-
-
+    else:
+        command = method + ' ' + file
+        os.system(command)
 
 
 def print_help():
